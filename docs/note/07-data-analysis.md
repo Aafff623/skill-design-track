@@ -1,53 +1,111 @@
-# 07｜数据分析（data-analysis）
+---
+tags:
+  - TRAE
+  - SOLO
+  - Skill
+  - 极客时间
+type: 课程笔记
+status: 完成
+created: 2026-05-16
+updated: 2026-05-16
+source: "极客时间 · Claude Code Skill 入门实战课 · 陈燊燊"
+duration: "07:27"
+skill: "ai-news"
+---
 
-> 7 步分析法，CSV → 业务洞察报告（What→SoWhat→NowWhat）。
+# 07｜情报雷达：AI 资讯自动汇总
+
+> Skill 名：`ai-news` — 获取每日最新 AI 资讯并生成赛博朋克风格展示页面。从 AIBase 和 36氪 AI 频道抓取数据，生成 `ai-news-data.js` + `ai-news.html` 两个文件。
+
+> [!note] 通俗摘要
+> 这节课教了一个稍微特殊的 Skill：它需要借助另一个外部工具 `agent-browser`（无头浏览器）才能抓取网页数据。核心设计亮点是**数据与展示分离**——抓取的资讯存到 `ai-news-data.js`，展示页面 `ai-news.html` 通过 `<script src>` 引入数据，两个文件可以独立更新。视觉风格选了赛博朋克（霓虹灯、深色背景、科技感），天然契合 AI 话题。
 
 ## 核心概念
 
-### 7 步分析流程（含 3 个交互点）
+**工作流**
 
-CSV 输入 → 业务理解 → 数据检查 → 清洗策略 → 探索分析 → 深度分析 → 洞察生成 → 输出交付
+```mermaid
+graph LR
+    S1[使用 agent-browser\n访问 AIBase + 36氪]
+    S2[提取并整理\n标题/摘要/链接/标签\n保存为 ai-news-data.js]
+    S3[生成展示页面\n赛博朋克风格 HTML\n通过 script src 引入数据]
+    S1-->S2-->S3
+```
 
-### 数据质量评分
+**数据格式**
 
-得分 = 100 - 缺失惩罚（最高40）- 重复惩罚（最高20）- 类型错误惩罚（每列10）
+```javascript
+const NEWS_DATA = [
+  {
+    "title": "文章标题",
+    "description": "80字以内精炼摘要",
+    "link": "完整URL",
+    "tags": ["AI", "标签1", "标签2"]
+  }
+];
+```
 
-- >=80 → 自动修复继续
-- 60-79 → 提示问题，确认是否继续
-- <60 → 警告，建议修复后再分析
+**抓取规格**
 
-### 深度分析方法映射
+- 每个数据源至少 5 条，合计目标 15-20 条
+- 去除明显重复（相同主题/相似标题）
+- 链接不完整 → 自动补全域名前缀
+- 某个数据源失败 → 跳过，继续其他源
 
-| 业务问题类型 | 分析方法 |
-|-------------|---------|
-| 趋势随时间变化 | 时间序列 + 移动平均 |
-| 归因/因果 | 分组对比 + 贡献分解 |
-| 用户行为 | 漏斗分析 + 留存 Cohort |
-| 客户价值 | RFM 模型 |
-| 预测 | 线性回归 / 指数平滑 |
+> *📌 JS 文件中字符串内部的双引号必须用 `\` 转义——这是个容易踩的坑，SKILL.md 特别提醒了。*
 
-### 洞察框架：What → So What → Now What
+**赛博朋克视觉要点**
 
-| 层级 | 内容 |
-|------|------|
-| What | 客观事实 + 具体数字 |
-| So What | 为什么重要 + 量化影响 + 根因假设 |
-| Now What | 优先级 + 时间线 + 执行团队 |
+- 背景：深蓝/黑色调（`#0a0e27`、`#1a1a2e`）
+- 发光效果：`text-shadow` + `box-shadow` 实现霓虹
+- 配色：青色、紫色、粉色三色系
+- 扫描线或网格背景
+- 卡片 hover：发光或抬升效果
 
-### 三种输出格式
+## Skill 创建提示词
 
-| 选项 | 内容 | 适用场景 |
-|------|------|---------|
-| Quick Report | Markdown + PNG 图表 | 邮件/文档/GitHub |
-| Interactive Report | 单页 HTML + Chart.js | 演示/交互探索 |
-| Full Dashboard | 多页 Web App | 对外汇报/持续监控 |
+> 讲师视频中创建这个 Skill 的提示词（`lesson7/安装命令.txt`，节选）：
 
-## 技术约束
+````
+使用 skill-creator 创建一个 AI 资讯 skill，用于获取每日最新的 AI 资讯
 
-- 支持 --quick --auto 跳过交互点
-- 依赖：pandas、numpy、scipy、matplotlib、seaborn
+Step 1：数据获取
+使用 agent-browser skill 分别访问：
+1. AIBase — https://www.aibase.com/zh/news
+2. 36氪 AI 频道 — https://www.36kr.com/information/AI/
 
-## 竞赛价值
+将抓取到的数据整理为以下格式，保存为 ai-news-data.js：
+const NEWS_DATA = [{ title, description（80字内）, link, tags（2-4个）}];
 
-- 对运营、数据分析师、产品经理都有吸引力
-- 展示「业务问题 + CSV → 可交互报告」的完整流程
+注意事项：
+- JS 文件中字符串内部的双引号必须在前面加反斜杠转义
+- 某个网站无法访问则跳过，每源至少 5 条，合计 15-20 条，去重
+- 链接不完整自动补全；tags 根据内容自动推断
+
+Step 2：展示页面
+创建赛博朋克风格 HTML 页面，通过 <script src> 引入数据文件（数据与模板分离）
+要求：深色背景、霓虹灯效果、卡片式布局、响应式
+
+交付：ai-news-data.js + ai-news.html
+
+请将该 skill 保存到当前工作目录 .claude/skills 下
+````
+
+> *📌 「数据与展示分离」的架构设计是这个提示词的亮点——每天只需重新生成 data.js，HTML 模板不变，这种设计思路可以复用到其他动态数据 Skill。*
+
+## 实操要点
+
+1. 必须提前安装 `agent-browser`：
+   ```bash
+   npm install -g agent-browser
+   agent-browser install
+   npx skills add vercel-labs/agent-browser --skill agent-browser
+   ```
+2. `evals/evals.json` 有 3 个测试用例，包括短请求「ai新闻」也要能正确触发
+3. 数据文件和展示文件分离：每天更新只需重新生成 `ai-news-data.js`
+
+## 在大赛中的位置
+
+> *📌 自动抓取 + 生成展示页是 More Than Coding 赛道中偏技术向的好选择。参赛时展示「输入一条指令 → 自动获取当日 AI 资讯 → 生成可查看页面」的完整截图，视觉效果好，实用性强。*
+
+🐱 这个 Skill 就像一个每天早上自动帮你刷资讯、整理成一张精美海报贴在墙上的助手——你只需要说「给我今天的 AI 新闻」。
