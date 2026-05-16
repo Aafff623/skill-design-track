@@ -1,0 +1,23 @@
+{
+  "skill_name": "ai-news",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "获取今日AI资讯",
+      "expected_output": "生成ai-news-data.js和ai-news.html两个文件，包含15-20条从AIBase和36氪抓取的AI资讯，HTML页面采用赛博朋克风格",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我想看看最近AI行业有什么新闻，帮我整理一下",
+      "expected_output": "使用agent-browser从多个数据源抓取AI资讯，生成数据文件和可视化展示页面",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "ai新闻",
+      "expected_output": "即使是简短的请求，也能正确触发skill，抓取数据并生成展示页面",
+      "files": []
+    }
+  ]
+}

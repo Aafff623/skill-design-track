@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>积分兑换 - 电商平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff5f5',
+                            100: '#ffe0e0',
+                            200: '#ffb3b3',
+                            300: '#ff8080',
+                            400: '#ff4d4d',
+                            500: '#e53935',
+                            600: '#c62828',
+                            700: '#a11f1f',
+                            800: '#7b1616',
+                            900: '#550e0e',
+                        },
+                        accent: {
+                            50: '#fff8f0',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'Poppins', 'sans-serif'],
+                        display: ['Poppins', 'Noto Sans SC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', 'Poppins', sans-serif; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f5f5f5; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 999px; }
+
+        /* Page transitions */
+        .page { display: none; animation: pageIn 0.3s ease-out; }
+        .page.active { display: block; }
+
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+        .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+        .animate-pulse-ring { animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-shimmer {
+            background: linear-gradient(90deg, #f5f5f5 25%, #e5e5e5 50%, #f5f5f5 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+
+        /* Stagger animation */
+        .stagger-1 { animation-delay: 0.05s; }
+        .stagger-2 { animation-delay: 0.1s; }
+        .stagger-3 { animation-delay: 0.15s; }
+        .stagger-4 { animation-delay: 0.2s; }
+        .stagger-5 { animation-delay: 0.25s; }
+        .stagger-6 { animation-delay: 0.3s; }
+
+        /* Tab active indicator */
+        .tab-active { position: relative; }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: #e53935;
+            border-radius: 999px;
+        }
+
+        /* Points badge glow */
+        .points-glow {
+            text-shadow: 0 0 20px rgba(229, 57, 53, 0.3);
+        }
+
+        /* Product card hover */
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 999px;
+            background: #ffe0e0;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #e53935;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(229, 57, 53, 0.4);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            max-width: 360px;
+            width: 90%;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 900;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Coupon dashed border */
+        .coupon-card {
+            border-left: 4px dashed #e53935;
+        }
+
+        /* Bottom nav */
+        .nav-item {
+            transition: all 0.2s;
+        }
+        .nav-item.active { color: #e53935; }
+        .nav-item.active svg { stroke: #e53935; }
+
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 max-w-md mx-auto relative overflow-x-hidden" style="min-height: 100vh;">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div id="toast-content" class="bg-gray-800 text-white rounded-2xl px-5 py-3.5 shadow-2xl flex items-center gap-3">
+            <span id="toast-icon"></span>
+            <span id="toast-text" class="text-sm font-medium"></span>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal" class="modal-overlay" onclick="closeModal(event)">
+        <div id="modal-content" class="bg-white rounded-t-3xl w-full max-w-md p-6 animate-slide-up" onclick="event.stopPropagation()">
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: Points Account ==================== -->
+    <div id="page-points" class="page active pb-20">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-brand-500 to-brand-600 pt-10 pb-16 px-5 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+            <div class="flex items-center justify-between mb-8 relative z-10">
+                <h1 class="text-white text-xl font-bold">我的积分</h1>
+                <button class="text-white/80 hover:text-white" onclick="showToast('success', '积分规则说明开发中')">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="relative z-10">
+                <p class="text-white/70 text-sm mb-1">当前可用积分</p>
+                <div class="flex items-baseline gap-1 mb-1">
+                    <span id="points-balance" class="text-white text-5xl font-extrabold font-display points-glow">2,680</span>
+                    <span class="text-white/60 text-sm">分</span>
+                </div>
+                <p class="text-white/50 text-xs">≈ ¥<span id="points-value">26.80</span></p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="px-5 -mt-8 relative z-20 mb-5">
+            <div class="bg-white rounded-2xl shadow-xl shadow-black/5 p-4 grid grid-cols-3 gap-3">
+                <div class="text-center">
+                    <div class="flex items-center justify-center w-9 h-9 bg-amber-50 rounded-xl mx-auto mb-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                    </div>
+                    <p class="text-gray-400 text-[10px] mb-0.5">待生效</p>
+                    <p class="text-gray-800 text-base font-bold">320</p>
+                </div>
+                <div class="text-center border-x border-gray-100">
+                    <div class="flex items-center justify-center w-9 h-9 bg-blue-50 rounded-xl mx-auto mb-2">
+                        <i data-lucide="snowflake" class="w-4 h-4 text-blue-500"></i>
+                    </div>
+                    <p class="text-gray-400 text-[10px] mb-0.5">已冻结</p>
+                    <p class="text-gray-800 text-base font-bold">0</p>
+                </div>
+                <div class="text-center">
+                    <div class="flex items-center justify-center w-9 h-9 bg-green-50 rounded-xl mx-auto mb-2">
+                        <i data-lucide="trending-up" class="w-4 h-4 text-green-500"></i>
+                    </div>
+                    <p class="text-gray-400 text-[10px] mb-0.5">累计获得</p>
+                    <p class="text-gray-800 text-base font-bold">5,200</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="px-5 mb-6">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="navigateTo('mall')" class="flex items-center gap-3 bg-gradient-to-r from-brand-50 to-accent-50 rounded-2xl p-4 active:scale-[0.97] transition-transform">
+                    <div class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-200">
+                        <i data-lucide="gift" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-gray-800 text-sm font-semibold">积分商城</p>
+                        <p class="text-gray-400 text-[10px]">好物等你兑</p>
+                    </div>
+                </button>
+                <button onclick="navigateTo('checkout')" class="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 active:scale-[0.97] transition-transform">
+                    <div class="w-10 h-10 bg-gold-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200">
+                        <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-gray-800 text-sm font-semibold">积分抵扣</p>
+                        <p class="text-gray-400 text-[10px]">下单更划算</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Points History -->
+        <div class="px-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-gray-800 text-base font-bold">积分明细</h2>
+                <button onclick="showToast('info', '查看全部明细')" class="text-gray-400 text-xs flex items-center gap-1">
+                    全部 <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-4" id="history-tabs">
+                <button class="flex-1 py-2 text-xs font-medium rounded-lg bg-white text-brand-500 shadow-sm transition-all" onclick="filterHistory('all', this)" data-active="true">全部</button>
+                <button class="flex-1 py-2 text-xs font-medium rounded-lg text-gray-500 transition-all" onclick="filterHistory('income', this)">收入</button>
+                <button class="flex-1 py-2 text-xs font-medium rounded-lg text-gray-500 transition-all" onclick="filterHistory('expense', this)">支出</button>
+                <button class="flex-1 py-2 text-xs font-medium rounded-lg text-gray-500 transition-all" onclick="filterHistory('frozen', this)">冻结</button>
+            </div>
+
+            <!-- History List -->
+            <div id="history-list" class="space-y-1">
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: Points Mall ==================== -->
+    <div id="page-mall" class="page pb-20">
+        <!-- Header -->
+        <div class="bg-white sticky top-0 z-30 px-5 pt-10 pb-3 border-b border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <button onclick="navigateTo('points')" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+                </button>
+                <h1 class="text-gray-800 text-lg font-bold">积分商城</h1>
+                <div class="flex items-center gap-1 bg-amber-50 rounded-full px-3 py-1.5">
+                    <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-500"></i>
+                    <span class="text-amber-600 text-xs font-semibold" id="mall-points">2,680</span>
+                </div>
+            </div>
+            <!-- Category Tabs -->
+            <div class="flex gap-5 overflow-x-auto no-scrollbar">
+                <button class="tab-active text-brand-500 text-sm font-semibold whitespace-nowrap pb-1" onclick="filterMall('all', this)">全部</button>
+                <button class="text-gray-400 text-sm font-medium whitespace-nowrap pb-1" onclick="filterMall('product', this)">实物商品</button>
+                <button class="text-gray-400 text-sm font-medium whitespace-nowrap pb-1" onclick="filterMall('coupon', this)">优惠券</button>
+                <button class="text-gray-400 text-sm font-medium whitespace-nowrap pb-1" onclick="filterMall('vip', this)">会员权益</button>
+            </div>
+        </div>
+
+        <!-- Banner -->
+        <div class="px-5 mt-4 mb-5">
+            <div class="bg-gradient-to-r from-brand-500 via-brand-400 to-accent-500 rounded-2xl p-5 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+                <p class="text-white/80 text-xs mb-1">限时活动</p>
+                <h3 class="text-white text-xl font-bold mb-1">新人专享兑换</h3>
+                <p class="text-white/70 text-xs mb-3">精选好物低至 500 积分</p>
+                <button class="bg-white text-brand-500 text-xs font-bold px-4 py-2 rounded-full active:scale-95 transition-transform">立即查看</button>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="px-5">
+            <div id="mall-grid" class="grid grid-cols-2 gap-3">
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: Product Detail ==================== -->
+    <div id="page-detail" class="page pb-28">
+        <!-- Product Image -->
+        <div class="relative">
+            <div id="detail-image" class="w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <i data-lucide="package" class="w-16 h-16 text-gray-300"></i>
+            </div>
+            <button onclick="navigateTo('mall')" class="absolute top-10 left-4 w-9 h-9 flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-full">
+                <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
+            </button>
+        </div>
+
+        <!-- Product Info -->
+        <div class="bg-white px-5 py-4 -mt-4 rounded-t-3xl relative z-10">
+            <div class="flex items-center gap-2 mb-2">
+                <span id="detail-badge" class="bg-brand-50 text-brand-500 text-[10px] font-bold px-2 py-0.5 rounded-full">限时兑换</span>
+                <span id="detail-stock" class="text-gray-400 text-[10px]">库存充足</span>
+            </div>
+            <h1 id="detail-name" class="text-gray-900 text-lg font-bold mb-2">商品名称</h1>
+            <div class="flex items-baseline gap-2 mb-3">
+                <div class="flex items-center gap-1">
+                    <i data-lucide="coins" class="w-4 h-4 text-amber-500"></i>
+                    <span id="detail-price" class="text-brand-500 text-2xl font-extrabold font-display">0</span>
+                    <span class="text-brand-400 text-xs">积分</span>
+                </div>
+                <span id="detail-original" class="text-gray-400 text-sm line-through">¥0</span>
+            </div>
+
+            <!-- Exchange Rules -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                <p class="text-gray-500 text-xs font-semibold mb-2">兑换规则</p>
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2 text-gray-400 text-xs">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-green-400 shrink-0"></i>
+                        <span>每人限兑 <span id="detail-limit">1</span> 件</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-400 text-xs">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-green-400 shrink-0"></i>
+                        <span>兑换后不支持退换</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-400 text-xs">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-green-400 shrink-0"></i>
+                        <span>奖品将在 3 个工作日内发放</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Description -->
+            <div class="mb-4">
+                <p class="text-gray-800 text-sm font-semibold mb-2">商品详情</p>
+                <p id="detail-desc" class="text-gray-500 text-xs leading-relaxed">商品描述</p>
+            </div>
+        </div>
+
+        <!-- Bottom CTA -->
+        <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 px-5 py-4 z-40">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="navigateTo('mall')" class="flex flex-col items-center gap-0.5">
+                        <i data-lucide="store" class="w-5 h-5 text-gray-400"></i>
+                        <span class="text-gray-400 text-[10px]">商城</span>
+                    </button>
+                </div>
+                <button id="detail-exchange-btn" onclick="exchangeProduct()" class="flex-1 ml-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white text-sm font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.97] transition-transform">
+                    立即兑换
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: Checkout ==================== -->
+    <div id="page-checkout" class="page pb-28">
+        <!-- Header -->
+        <div class="bg-white sticky top-0 z-30 px-5 pt-10 pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <button onclick="navigateTo('points')" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+                </button>
+                <h1 class="text-gray-800 text-lg font-bold">订单结算</h1>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="bg-white mt-3 mx-5 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-5 h-5 bg-brand-500 rounded flex items-center justify-center">
+                    <i data-lucide="store" class="w-3 h-3 text-white"></i>
+                </div>
+                <span class="text-gray-800 text-sm font-semibold">官方旗舰店</span>
+            </div>
+            <div id="checkout-items" class="space-y-3">
+            </div>
+            <div class="border-t border-dashed border-gray-200 mt-3 pt-3 flex items-center justify-end">
+                <span class="text-gray-500 text-sm">共 <span class="text-gray-800 font-semibold" id="checkout-count">3</span> 件</span>
+                <span class="text-gray-400 mx-2">|</span>
+                <span class="text-gray-500 text-sm">合计</span>
+                <span class="text-brand-500 text-lg font-bold font-display ml-1">¥<span id="checkout-subtotal">299.00</span></span>
+            </div>
+        </div>
+
+        <!-- Points Deduction -->
+        <div class="bg-white mt-3 mx-5 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="coins" class="w-5 h-5 text-amber-500"></i>
+                    <span class="text-gray-800 text-sm font-semibold">积分抵扣</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="points-toggle" class="sr-only peer" checked onchange="togglePoints()">
+                    <div class="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-brand-500 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-[2px] peer-checked:after:translate-x-full after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
+                </label>
+            </div>
+
+            <div id="points-deduction-panel" class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-xs">可用积分</span>
+                    <span class="text-gray-700 text-xs font-medium"><span id="checkout-available-points">2,680</span> 积分（可抵 ¥<span id="checkout-max-deduct">89.70</span>）</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-xs">本单最多抵扣 30%</span>
+                    <span class="text-gray-400 text-xs">¥<span id="checkout-30-percent">89.70</span></span>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-500 text-xs">使用积分</span>
+                        <span class="text-brand-500 text-sm font-bold font-display"><span id="slider-points-value">2600</span> 积分 = -¥<span id="slider-deduct-value">26.00</span></span>
+                    </div>
+                    <input type="range" id="points-slider" min="0" max="2600" step="100" value="2600" class="w-full" oninput="updatePointsSlider(this.value)">
+                    <div class="flex justify-between mt-1">
+                        <span class="text-gray-300 text-[10px]">0</span>
+                        <span class="text-gray-300 text-[10px]" id="slider-max-label">2,600</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="bg-white mt-3 mx-5 rounded-2xl p-4 shadow-sm">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-sm">商品总价</span>
+                    <span class="text-gray-700 text-sm">¥<span id="summary-original">299.00</span></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-sm">运费</span>
+                    <span class="text-green-500 text-sm font-medium">免运费</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-sm">积分抵扣</span>
+                    <span class="text-brand-500 text-sm font-medium">-¥<span id="summary-deduct">26.00</span></span>
+                </div>
+                <div class="border-t border-gray-100 pt-2.5 flex items-center justify-between">
+                    <span class="text-gray-800 text-sm font-bold">实付金额</span>
+                    <span class="text-brand-500 text-xl font-extrabold font-display">¥<span id="summary-total">273.00</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom CTA -->
+        <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 px-5 py-4 z-40">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-[10px]">应付金额</p>
+                    <p class="text-brand-500 text-xl font-extrabold font-display">¥<span id="bottom-total">273.00</span></p>
+                </div>
+                <button onclick="submitOrder()" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white text-sm font-bold px-10 py-3.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.97] transition-transform">
+                    提交订单
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: Refund ==================== -->
+    <div id="page-refund" class="page pb-20">
+        <!-- Header -->
+        <div class="bg-white sticky top-0 z-30 px-5 pt-10 pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <button onclick="navigateTo('points')" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+                </button>
+                <h1 class="text-gray-800 text-lg font-bold">退款退积分</h1>
+            </div>
+        </div>
+
+        <!-- Order Info -->
+        <div class="bg-white mt-3 mx-5 rounded-2xl p-4 shadow-sm mb-3">
+            <p class="text-gray-800 text-sm font-semibold mb-3">订单信息</p>
+            <div class="flex gap-3 mb-3">
+                <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="shopping-bag" class="w-8 h-8 text-gray-300"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-gray-800 text-sm font-medium truncate">商品组合套装</p>
+                    <p class="text-gray-400 text-xs mt-0.5">共3件</p>
+                    <p class="text-gray-800 text-sm font-bold mt-1">¥299.00</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-xs">订单编号</span>
+                    <span class="text-gray-600 text-xs font-mono">DD20260315001</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-xs">下单时间</span>
+                    <span class="text-gray-600 text-xs">2026-03-15 14:30</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-xs">积分抵扣</span>
+                    <span class="text-brand-500 text-xs font-medium">-2,600 积分（-¥26.00）</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refund Details -->
+        <div class="bg-white mx-5 rounded-2xl p-4 shadow-sm mb-3">
+            <p class="text-gray-800 text-sm font-semibold mb-3">退款信息</p>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-gray-500 text-xs mb-1.5 block">退款原因</label>
+                    <select class="w-full bg-gray-50 rounded-xl px-3 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-brand-100 transition">
+                        <option>商品质量问题</option>
+                        <option>商品与描述不符</option>
+                        <option>不想要了</option>
+                        <option>尺寸不合适</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-500 text-xs mb-1.5 block">退款说明（选填）</label>
+                    <textarea class="w-full bg-gray-50 rounded-xl px-3 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-brand-100 transition resize-none h-20" placeholder="请描述具体问题..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refund Summary -->
+        <div class="bg-white mx-5 rounded-2xl p-4 shadow-sm mb-3">
+            <p class="text-gray-800 text-sm font-semibold mb-3">退款预估</p>
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-sm">商品退款</span>
+                    <span class="text-gray-700 text-sm">+¥273.00</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 text-sm">积分返还</span>
+                    <span class="text-amber-500 text-sm font-medium">+2,600 积分</span>
+                </div>
+                <div class="border-t border-dashed border-gray-200 pt-2.5 flex items-center justify-between">
+                    <span class="text-gray-800 text-sm font-bold">退款总计</span>
+                    <div class="text-right">
+                        <span class="text-brand-500 text-lg font-extrabold font-display">¥273.00</span>
+                        <span class="text-gray-400 text-xs ml-2">+ 2,600积分</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3 bg-amber-50 rounded-xl p-3 flex items-start gap-2">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                <p class="text-amber-600 text-[11px] leading-relaxed">积分将在退款成功后自动返还至您的积分账户，请留意积分明细。</p>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="px-5 mt-5">
+            <button onclick="submitRefund()" class="w-full bg-gradient-to-r from-brand-500 to-brand-600 text-white text-sm font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.97] transition-transform">
+                确认申请退款
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE: Exchange Success ==================== -->
+    <div id="page-success" class="page">
+        <div class="flex flex-col items-center justify-center min-h-screen px-5">
+            <div class="animate-scale-in">
+                <div class="relative w-24 h-24 mb-6">
+                    <div class="absolute inset-0 bg-green-100 rounded-full animate-pulse-ring"></div>
+                    <div class="relative w-24 h-24 bg-green-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="check" class="w-12 h-12 text-white" stroke-width="3"></i>
+                    </div>
+                </div>
+            </div>
+            <h1 id="success-title" class="text-gray-900 text-xl font-bold mb-2 animate-fade-in-up">兑换成功</h1>
+            <p id="success-desc" class="text-gray-400 text-sm text-center mb-8 animate-fade-in-up stagger-1">商品将在3个工作日内发放到您的账户</p>
+            <div id="success-detail" class="bg-white rounded-2xl p-5 w-full shadow-sm animate-fade-in-up stagger-2">
+            </div>
+            <button onclick="navigateTo('mall')" class="mt-6 bg-gray-100 text-gray-600 text-sm font-medium px-8 py-3 rounded-2xl active:scale-[0.97] transition-transform animate-fade-in-up stagger-3">
+                继续逛逛
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== Bottom Navigation ==================== -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 z-50">
+        <div class="flex items-center justify-around py-2">
+            <button class="nav-item active flex flex-col items-center gap-0.5 px-4 py-1" onclick="navigateTo('points')">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <span class="text-[10px] font-medium">积分</span>
+            </button>
+            <button class="nav-item flex flex-col items-center gap-0.5 px-4 py-1" onclick="navigateTo('mall')">
+                <i data-lucide="gift" class="w-5 h-5"></i>
+                <span class="text-[10px] font-medium">商城</span>
+            </button>
+            <button class="nav-item flex flex-col items-center gap-0.5 px-4 py-1" onclick="showToast('info', '订单功能开发中')">
+                <i data-lucide="package" class="w-5 h-5"></i>
+                <span class="text-[10px] font-medium">订单</span>
+            </button>
+            <button class="nav-item flex flex-col items-center gap-0.5 px-4 py-1" onclick="showToast('info', '个人中心开发中')">
+                <i data-lucide="user" class="w-5 h-5"></i>
+                <span class="text-[10px] font-medium">我的</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // ==================== Mock Data ====================
+        const state = {
+            points: 2680,
+            pendingPoints: 320,
+            frozenPoints: 0,
+            totalEarned: 5200,
+            currentPage: 'points',
+            selectedProduct: null,
+        };
+
+        const historyData = [
+            { id: 1, type: 'income', title: '订单完成奖励', desc: '订单#DD20260314002 确认收货', amount: '+156', time: '2026-03-15 16:42', category: 'income' },
+            { id: 2, type: 'income', title: '订单完成奖励', desc: '订单#DD20260313001 确认收货', amount: '+89', time: '2026-03-14 09:18', category: 'income' },
+            { id: 3, type: 'expense', title: '积分兑换商品', desc: '兑换"蓝牙耳机"成功', amount: '-1,200', time: '2026-03-13 20:05', category: 'expense' },
+            { id: 4, type: 'income', title: '签到奖励', desc: '连续签到第7天', amount: '+50', time: '2026-03-13 08:00', category: 'income' },
+            { id: 5, type: 'expense', title: '订单积分抵扣', desc: '订单#DD20260312003 使用积分', amount: '-500', time: '2026-03-12 15:33', category: 'expense' },
+            { id: 6, type: 'income', title: '订单完成奖励', desc: '订单#DD20260311005 确认收货', amount: '+228', time: '2026-03-11 11:20', category: 'income' },
+            { id: 7, type: 'income', title: '评价奖励', desc: '评价商品获得奖励积分', amount: '+30', time: '2026-03-10 19:45', category: 'income' },
+            { id: 8, type: 'expense', title: '积分兑换优惠券', desc: '兑换"满100减15"优惠券', amount: '-800', time: '2026-03-10 14:10', category: 'expense' },
+        ];
+
+        const mallProducts = [
+            { id: 1, name: '小米蓝牙耳机', price: 1200, originalPrice: '¥69.00', category: 'product', stock: 56, limit: 1, color: 'from-blue-50 to-blue-100', icon: 'headphones' },
+            { id: 2, name: '满100减15优惠券', price: 800, originalPrice: '¥15.00', category: 'coupon', stock: 200, limit: 3, color: 'from-red-50 to-red-100', icon: 'ticket' },
+            { id: 3, name: '定制帆布袋', price: 500, originalPrice: '¥35.00', category: 'product', stock: 120, limit: 2, color: 'from-green-50 to-green-100', icon: 'shopping-bag' },
+            { id: 4, name: '月度会员权益卡', price: 2000, originalPrice: '¥20.00', category: 'vip', stock: 50, limit: 1, color: 'from-amber-50 to-amber-100', icon: 'crown' },
+            { id: 5, name: '满200减30优惠券', price: 1500, originalPrice: '¥30.00', category: 'coupon', stock: 150, limit: 2, color: 'from-orange-50 to-orange-100', icon: 'ticket' },
+            { id: 6, name: '便携保温杯', price: 900, originalPrice: '¥49.00', category: 'product', stock: 0, limit: 1, color: 'from-purple-50 to-purple-100', icon: 'coffee' },
+            { id: 7, name: '视频会员月卡', price: 1800, originalPrice: '¥18.00', category: 'vip', stock: 80, limit: 1, color: 'from-cyan-50 to-cyan-100', icon: 'play-circle' },
+            { id: 8, name: '满50减8优惠券', price: 400, originalPrice: '¥8.00', category: 'coupon', stock: 300, limit: 5, color: 'from-pink-50 to-pink-100', icon: 'ticket' },
+        ];
+
+        const checkoutItems = [
+            { name: '纯棉短袖T恤', spec: '白色 / L码', price: 89.00, qty: 2 },
+            { name: '运动休闲长裤', spec: '黑色 / M码', price: 121.00, qty: 1 },
+        ];
+
+        // ==================== Navigation ====================
+        function navigateTo(page, data) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+            // Show target page
+            const target = document.getElementById(`page-${page}`);
+            if (target) {
+                target.classList.add('active');
+                state.currentPage = page;
+            }
+
+            // Update nav
+            updateNav(page);
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+
+            // Re-init lucide icons
+            setTimeout(() => lucide.createIcons(), 50);
+
+            // Page-specific init
+            if (page === 'mall') renderMallGrid();
+            if (page === 'checkout') initCheckout();
+            if (page === 'detail') renderDetail(data);
+            if (page === 'points') {
+                renderHistory();
+                updatePointsDisplay();
+            }
+        }
+
+        function updateNav(page) {
+            const navMap = { points: 0, mall: 1 };
+            const idx = navMap[page];
+            document.querySelectorAll('.nav-item').forEach((item, i) => {
+                item.classList.toggle('active', i === idx);
+            });
+        }
+
+        // ==================== Points Display ====================
+        function updatePointsDisplay() {
+            document.getElementById('points-balance').textContent = state.points.toLocaleString();
+            document.getElementById('points-value').textContent = (state.points / 100).toFixed(2);
+            document.getElementById('mall-points').textContent = state.points.toLocaleString();
+        }
+
+        // ==================== History ====================
+        function renderHistory(filter = 'all') {
+            const list = document.getElementById('history-list');
+            const filtered = filter === 'all' ? historyData :
+                filter === 'income' ? historyData.filter(h => h.type === 'income') :
+                filter === 'expense' ? historyData.filter(h => h.type === 'expense') :
+                historyData.filter(h => h.type === 'frozen');
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="flex flex-col items-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                            <i data-lucide="inbox" class="w-8 h-8 text-gray-300"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm">暂无相关记录</p>
+                    </div>
+                `;
+                setTimeout(() => lucide.createIcons(), 50);
+                return;
+            }
+
+            list.innerHTML = filtered.map((item, i) => `
+                <div class="flex items-center justify-between py-3 border-b border-gray-50 animate-fade-in-up stagger-${i + 1}" style="opacity:0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center ${item.type === 'income' ? 'bg-green-50' : 'bg-red-50'}">
+                            <i data-lucide="${item.type === 'income' ? 'arrow-down-left' : 'arrow-up-right'}" class="w-4 h-4 ${item.type === 'income' ? 'text-green-500' : 'text-red-400'}"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-800 text-sm font-medium">${item.title}</p>
+                            <p class="text-gray-400 text-[11px] mt-0.5">${item.time}</p>
+                        </div>
+                    </div>
+                    <span class="text-sm font-bold font-display ${item.type === 'income' ? 'text-green-500' : 'text-gray-800'}">${item.amount}</span>
+                </div>
+            `).join('');
+
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        function filterHistory(type, btn) {
+            // Update tabs
+            document.querySelectorAll('#history-tabs button').forEach(b => {
+                b.className = 'flex-1 py-2 text-xs font-medium rounded-lg text-gray-500 transition-all';
+            });
+            btn.className = 'flex-1 py-2 text-xs font-medium rounded-lg bg-white text-brand-500 shadow-sm transition-all';
+            renderHistory(type);
+        }
+
+        // ==================== Mall ====================
+        function renderMallGrid(filter = 'all') {
+            const grid = document.getElementById('mall-grid');
+            const filtered = filter === 'all' ? mallProducts : mallProducts.filter(p => p.category === filter);
+
+            grid.innerHTML = filtered.map((product, i) => {
+                const canExchange = state.points >= product.price && product.stock > 0;
+                const outOfStock = product.stock === 0;
+
+                return `
+                <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm animate-fade-in-up stagger-${(i % 6) + 1}" style="opacity:0">
+                    <div class="aspect-square bg-gradient-to-br ${product.color} flex items-center justify-center relative">
+                        <i data-lucide="${product.icon}" class="w-12 h-12 text-gray-400"></i>
+                        ${product.category === 'coupon' ? `<div class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[10px] text-brand-500 font-bold px-2 py-0.5 rounded-full">优惠券</div>` : ''}
+                        ${outOfStock ? `<div class="absolute inset-0 bg-black/30 flex items-center justify-center"><span class="bg-black/60 text-white text-xs px-3 py-1 rounded-full">已抢光</span></div>` : ''}
+                    </div>
+                    <div class="p-3">
+                        <p class="text-gray-800 text-sm font-medium truncate mb-1.5">${product.name}</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-0.5">
+                                <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-500"></i>
+                                <span class="text-brand-500 text-base font-bold font-display">${product.price.toLocaleString()}</span>
+                            </div>
+                            <span class="text-gray-300 text-[10px]">剩${product.stock}件</span>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+
+            // Add click handlers
+            setTimeout(() => {
+                lucide.createIcons();
+                grid.querySelectorAll('.product-card').forEach((card, i) => {
+                    card.onclick = () => navigateTo('detail', filtered[i]);
+                });
+            }, 50);
+        }
+
+        function filterMall(type, btn) {
+            document.querySelectorAll('#page-mall .flex.gap-5 button').forEach(b => {
+                b.className = 'text-gray-400 text-sm font-medium whitespace-nowrap pb-1';
+            });
+            btn.className = 'tab-active text-brand-500 text-sm font-semibold whitespace-nowrap pb-1';
+            renderMallGrid(type);
+        }
+
+        // ==================== Product Detail ====================
+        function renderDetail(product) {
+            if (!product) return;
+            state.selectedProduct = product;
+
+            document.getElementById('detail-name').textContent = product.name;
+            document.getElementById('detail-price').textContent = product.price.toLocaleString();
+            document.getElementById('detail-original').textContent = product.originalPrice;
+            document.getElementById('detail-limit').textContent = product.limit;
+            document.getElementById('detail-stock').textContent = product.stock > 0 ? `库存 ${product.stock} 件` : '已售罄';
+
+            const btn = document.getElementById('detail-exchange-btn');
+            if (product.stock === 0) {
+                btn.textContent = '已售罄';
+                btn.className = 'flex-1 ml-4 bg-gray-200 text-gray-400 text-sm font-bold py-3.5 rounded-2xl cursor-not-allowed';
+            } else if (state.points < product.price) {
+                const diff = product.price - state.points;
+                btn.textContent = `还差 ${diff.toLocaleString()} 积分`;
+                btn.className = 'flex-1 ml-4 bg-gray-200 text-gray-400 text-sm font-bold py-3.5 rounded-2xl cursor-not-allowed';
+            } else {
+                btn.textContent = '立即兑换';
+                btn.className = 'flex-1 ml-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white text-sm font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.97] transition-transform';
+            }
+
+            const descMap = {
+                'product': '这是一款精选优质商品，品质保证，正品行货。兑换后将在3个工作日内通过快递发出，请保持收货地址正确。',
+                'coupon': '此优惠券可用于平台全场商品，下单时自动抵扣。优惠券有效期为领取后30天，请在有效期内使用。',
+                'vip': '会员权益卡激活后即刻生效，享受专属会员价、免运费、优先发货等多项权益。有效期自激活日起30天。',
+            };
+            document.getElementById('detail-desc').textContent = descMap[product.category] || '';
+
+            // Update image area
+            const imgArea = document.getElementById('detail-image');
+            imgArea.className = `w-full aspect-square bg-gradient-to-br ${product.color} flex items-center justify-center relative`;
+            imgArea.innerHTML = `<i data-lucide="${product.icon}" class="w-24 h-24 text-gray-400"></i>`;
+
+            // Re-render icons
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        // ==================== Exchange Product ====================
+        function exchangeProduct() {
+            const product = state.selectedProduct;
+            if (!product || product.stock === 0) return;
+            if (state.points < product.price) {
+                showToast('error', `积分不足，还差 ${(product.price - state.points).toLocaleString()} 积分`);
+                return;
+            }
+
+            showModal(`
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="coins" class="w-8 h-8 text-amber-500"></i>
+                    </div>
+                    <h3 class="text-gray-900 text-lg font-bold mb-1">确认兑换</h3>
+                    <p class="text-gray-400 text-sm mb-4">${product.name}</p>
+                    <div class="bg-gray-50 rounded-xl p-4 mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-500 text-sm">消耗积分</span>
+                            <span class="text-brand-500 text-sm font-bold font-display">${product.price.toLocaleString()} 积分</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500 text-sm">兑换后余额</span>
+                            <span class="text-gray-800 text-sm font-bold font-display">${(state.points - product.price).toLocaleString()} 积分</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="closeModal()" class="flex-1 py-3 rounded-xl border border-gray-200 text-gray-500 text-sm font-medium active:scale-[0.97] transition-transform">取消</button>
+                        <button onclick="confirmExchange()" class="flex-1 py-3 rounded-xl bg-brand-500 text-white text-sm font-bold active:scale-[0.97] transition-transform">确认兑换</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function confirmExchange() {
+            const product = state.selectedProduct;
+            closeModal();
+
+            // Deduct points
+            state.points -= product.price;
+            product.stock -= 1;
+
+            // Add history record
+            historyData.unshift({
+                id: Date.now(),
+                type: 'expense',
+                title: `积分兑换${product.category === 'coupon' ? '优惠券' : '商品'}`,
+                desc: `兑换"${product.name}"成功`,
+                amount: `-${product.price.toLocaleString()}`,
+                time: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/\//g, '-'),
+                category: 'expense'
+            });
+
+            // Show success page
+            document.getElementById('success-title').textContent = '兑换成功';
+            document.getElementById('success-desc').textContent = product.category === 'coupon'
+                ? '优惠券已发放至您的账户，下单时可直接使用'
+                : '商品将在3个工作日内发出，请留意物流信息';
+            document.getElementById('success-detail').innerHTML = `
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">兑换商品</span>
+                    <span class="text-gray-800 text-sm font-medium">${product.name}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">消耗积分</span>
+                    <span class="text-brand-500 text-sm font-bold">${product.price.toLocaleString()}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5">
+                    <span class="text-gray-400 text-sm">剩余积分</span>
+                    <span class="text-gray-800 text-sm font-bold">${state.points.toLocaleString()}</span>
+                </div>
+            `;
+            navigateTo('success');
+        }
+
+        // ==================== Checkout ====================
+        function initCheckout() {
+            const subtotal = 299.00;
+            const maxDeduct = Math.floor(subtotal * 0.3 * 100) / 100;
+            const maxPoints = Math.min(state.points, Math.floor(maxDeduct * 100));
+            const roundedMax = Math.floor(maxPoints / 100) * 100;
+
+            document.getElementById('checkout-available-points').textContent = state.points.toLocaleString();
+            document.getElementById('checkout-max-deduct').textContent = maxDeduct.toFixed(2);
+            document.getElementById('checkout-30-percent').textContent = maxDeduct.toFixed(2);
+
+            const slider = document.getElementById('points-slider');
+            slider.max = roundedMax;
+            slider.value = roundedMax;
+            document.getElementById('slider-max-label').textContent = roundedMax.toLocaleString();
+
+            updatePointsSlider(roundedMax);
+
+            // Render items
+            const itemsHtml = checkoutItems.map(item => `
+                <div class="flex gap-3">
+                    <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
+                        <i data-lucide="package" class="w-6 h-6 text-gray-300"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-gray-800 text-sm font-medium truncate">${item.name}</p>
+                        <p class="text-gray-400 text-[11px] mt-0.5">${item.spec}</p>
+                        <div class="flex items-center justify-between mt-1">
+                            <span class="text-gray-800 text-sm font-bold">¥${item.price.toFixed(2)}</span>
+                            <span class="text-gray-400 text-xs">×${item.qty}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('checkout-items').innerHTML = itemsHtml;
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        function togglePoints() {
+            const toggle = document.getElementById('points-toggle');
+            const panel = document.getElementById('points-deduction-panel');
+            if (toggle.checked) {
+                panel.style.display = 'block';
+                updatePointsSlider(document.getElementById('points-slider').value);
+            } else {
+                panel.style.display = 'none';
+                document.getElementById('summary-deduct').textContent = '0.00';
+                document.getElementById('summary-total').textContent = '299.00';
+                document.getElementById('bottom-total').textContent = '299.00';
+            }
+        }
+
+        function updatePointsSlider(val) {
+            val = parseInt(val);
+            const deduct = (val / 100).toFixed(2);
+            document.getElementById('slider-points-value').textContent = val.toLocaleString();
+            document.getElementById('slider-deduct-value').textContent = deduct;
+            document.getElementById('summary-deduct').textContent = deduct;
+
+            const total = (299.00 - parseFloat(deduct)).toFixed(2);
+            document.getElementById('summary-total').textContent = total;
+            document.getElementById('bottom-total').textContent = total;
+        }
+
+        function submitOrder() {
+            const toggle = document.getElementById('points-toggle');
+            let usedPoints = 0;
+            if (toggle.checked) {
+                usedPoints = parseInt(document.getElementById('points-slider').value);
+            }
+
+            if (usedPoints < 100 && usedPoints > 0) {
+                showToast('error', '最低使用 100 积分');
+                return;
+            }
+
+            state.points -= usedPoints;
+
+            if (usedPoints > 0) {
+                historyData.unshift({
+                    id: Date.now(),
+                    type: 'expense',
+                    title: '订单积分抵扣',
+                    desc: `订单#DD20260316001 使用积分`,
+                    amount: `-${usedPoints.toLocaleString()}`,
+                    time: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/\//g, '-'),
+                    category: 'expense'
+                });
+            }
+
+            document.getElementById('success-title').textContent = '下单成功';
+            document.getElementById('success-desc').textContent = usedPoints > 0 ? `使用 ${usedPoints.toLocaleString()} 积分抵扣了 ¥${(usedPoints/100).toFixed(2)}` : '订单提交成功，请等待商家发货';
+            document.getElementById('success-detail').innerHTML = `
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">订单金额</span>
+                    <span class="text-gray-800 text-sm font-medium">¥299.00</span>
+                </div>
+                ${usedPoints > 0 ? `<div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">积分抵扣</span>
+                    <span class="text-brand-500 text-sm font-bold">-${(usedPoints/100).toFixed(2)}</span>
+                </div>` : ''}
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">实付金额</span>
+                    <span class="text-brand-500 text-base font-bold">¥${(299.00 - usedPoints/100).toFixed(2)}</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5">
+                    <span class="text-gray-400 text-sm">剩余积分</span>
+                    <span class="text-gray-800 text-sm font-bold">${state.points.toLocaleString()}</span>
+                </div>
+            `;
+            navigateTo('success');
+        }
+
+        // ==================== Refund ====================
+        function submitRefund() {
+            state.points += 2600;
+            historyData.unshift({
+                id: Date.now(),
+                type: 'income',
+                title: '退款返还积分',
+                desc: '订单#DD20260315001 退款成功，积分已返还',
+                amount: '+2,600',
+                time: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/\//g, '-'),
+                category: 'income'
+            });
+
+            document.getElementById('success-title').textContent = '退款申请已提交';
+            document.getElementById('success-desc').textContent = '退款将在1-3个工作日内处理，积分将在退款成功后自动返还';
+            document.getElementById('success-detail').innerHTML = `
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">退款金额</span>
+                    <span class="text-gray-800 text-sm font-medium">¥273.00</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <span class="text-gray-400 text-sm">返还积分</span>
+                    <span class="text-amber-500 text-sm font-bold">+2,600</span>
+                </div>
+                <div class="flex items-center justify-between py-2.5">
+                    <span class="text-gray-400 text-sm">当前余额</span>
+                    <span class="text-gray-800 text-sm font-bold">${state.points.toLocaleString()} 积分</span>
+                </div>
+            `;
+            navigateTo('success');
+        }
+
+        // ==================== Toast ====================
+        function showToast(type, text) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const textEl = document.getElementById('toast-text');
+
+            const icons = {
+                success: '<i data-lucide="check-circle-2" class="w-5 h-5 text-green-400"></i>',
+                error: '<i data-lucide="x-circle" class="w-5 h-5 text-red-400"></i>',
+                info: '<i data-lucide="info" class="w-5 h-5 text-blue-400"></i>',
+            };
+
+            icon.innerHTML = icons[type] || icons.info;
+            textEl.textContent = text;
+            toast.classList.add('show');
+
+            setTimeout(() => lucide.createIcons(), 50);
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ==================== Modal ====================
+        function showModal(content) {
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal').classList.add('show');
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        function closeModal(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // ==================== Init ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderHistory();
+            updatePointsDisplay();
+        });
+    </script>
+</body>
+</html>
